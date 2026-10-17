@@ -1,0 +1,142 @@
+{
+  "api_key": {
+    "description": "DeepSeek API Key",
+    "hint": "支持填写多个：用英文逗号或换行分隔，插件会轮询并在 401/402/429 时自动切换下一个。留空则按下方 fallback_to_astrbot_key 的开关复用 AstrBot 已配置的 DeepSeek 密钥。",
+    "type": "string",
+    "default": ""
+  },
+  "fallback_to_astrbot_key": {
+    "description": "复用 AstrBot 已有的 DeepSeek 密钥",
+    "hint": "开启后，当上面的 api_key 为空时，自动从 AstrBot 的供应商配置中查找 provider=deepseek 或 api_base 指向 api.deepseek.com 的密钥，免去重复填写。",
+    "type": "bool",
+    "default": true
+  },
+  "base_url": {
+    "description": "API 根地址",
+    "hint": "默认 https://api.deepseek.com，插件会自动拼上 /v1/tools/search 与 /v1/tools/fetch。一般无需修改。",
+    "type": "string",
+    "default": "https://api.deepseek.com"
+  },
+  "enable_search_tool": {
+    "description": "启用联网搜索能力",
+    "hint": "关闭后不再注册 web_search_deepseek 工具，/dsearch 命令也不可用。",
+    "type": "bool",
+    "default": true
+  },
+  "enable_fetch_tool": {
+    "description": "启用网页抓取能力",
+    "hint": "关闭后不再注册 deepseek_fetch_web_page 工具，/dfetch 命令也不可用。",
+    "type": "bool",
+    "default": true
+  },
+  "default_count": {
+    "description": "默认返回结果条数",
+    "hint": "官方允许 1~50，默认 10。条数不影响单次请求价格。",
+    "type": "int",
+    "slider": {
+      "min": 1,
+      "max": 50,
+      "step": 1
+    },
+    "default": 10
+  },
+  "need_content": {
+    "description": "默认同时返回网页正文",
+    "hint": "对应官方 need_content 参数。开启后 content 字段会有正文，返回体积显著增大；建议按需由模型在调用时开启，而非全局默认开启。",
+    "type": "bool",
+    "default": false
+  },
+  "min_rerank_score": {
+    "description": "结果质量下限（rerank_score）",
+    "hint": "官方 rerank_score 取值 0~3，≥1.5 视为优质结果。实测无意义查询也会返回约 0.2 的噪声条目；设为 0 表示不过滤，设为 0.5~1.0 可有效去掉噪声。",
+    "type": "float",
+    "slider": {
+      "min": 0,
+      "max": 3,
+      "step": 0.1
+    },
+    "default": 0.0
+  },
+  "max_results_to_llm": {
+    "description": "提交给模型的结果条数上限",
+    "hint": "即使接口返回更多，也只把前 N 条写进模型上下文，避免长摘要挤爆窗口。命令回复同样按此条数展示。",
+    "type": "int",
+    "slider": {
+      "min": 1,
+      "max": 20,
+      "step": 1
+    },
+    "default": 8
+  },
+  "summary_max_chars": {
+    "description": "单条长摘要截断长度",
+    "hint": "官方 summary 通常 600~800 字符，此处可进一步截断以节省 token。",
+    "type": "int",
+    "slider": {
+      "min": 200,
+      "max": 2000,
+      "step": 100
+    },
+    "default": 800
+  },
+  "content_max_chars": {
+    "description": "搜索时附带正文的截断长度",
+    "hint": "仅当开启 need_content 时生效，控制写入模型上下文的正文长度。",
+    "type": "int",
+    "slider": {
+      "min": 500,
+      "max": 8000,
+      "step": 500
+    },
+    "default": 2000
+  },
+  "fetch_max_chars": {
+    "description": "抓取网页正文最大返回字符数",
+    "hint": "Fetch 返回的 Markdown 可能很长，超出部分会截断并提示原文长度。",
+    "type": "int",
+    "slider": {
+      "min": 500,
+      "max": 20000,
+      "step": 500
+    },
+    "default": 6000
+  },
+  "timeout_seconds": {
+    "description": "单次请求超时（秒）",
+    "hint": "官方建议 408/429/5xx 时等待后重试，插件已内置指数退避。",
+    "type": "int",
+    "slider": {
+      "min": 5,
+      "max": 120,
+      "step": 5
+    },
+    "default": 30
+  },
+  "max_retries": {
+    "description": "失败重试次数",
+    "hint": "仅对 408、429、5xx 与网络异常重试；其它 4xx（如参数错误、密钥无效、余额不足）不会重试。",
+    "type": "int",
+    "slider": {
+      "min": 0,
+      "max": 5,
+      "step": 1
+    },
+    "default": 2
+  },
+  "enable_llm_hint": {
+    "description": "向模型注入工具使用提示",
+    "hint": "在系统提示词里追加一小段说明，引导模型在需要实时信息时主动调用搜索工具。若你已有人格提示词管理，可关闭。",
+    "type": "bool",
+    "default": true
+  },
+  "command_reply_style": {
+    "description": "命令回复详细程度",
+    "hint": "detail：标题 + 链接 + 摘要 + 站点/日期/权威度；compact：仅标题与链接。",
+    "type": "string",
+    "options": [
+      "detail",
+      "compact"
+    ],
+    "default": "detail"
+  }
+}

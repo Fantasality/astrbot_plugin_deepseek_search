@@ -1,0 +1,59 @@
+name: astrbot_plugin_deepseek_search
+display_name: DeepSeek 官方搜索接入
+short_desc: 接入 DeepSeek 官方 Search / Fetch 接口，为 Bot 提供实时联网搜索与网页正文抓取
+desc: |
+  # DeepSeek 官方搜索接入
+
+  把 DeepSeek 官方新上线的 **Search** 与 **Fetch** 两个接口接入 AstrBot，让 Bot 真正具备
+  「联网搜索 + 读原文」的能力，不再依赖第三方搜索服务商。
+
+  - **Search**（`POST /v1/tools/search`）：按 query 检索网页，返回标题、链接、短摘要、
+    长摘要、发布时间、站点名与 0~3 的 rerank 相关度、0~4 的权威度。
+  - **Fetch**（`POST /v1/tools/fetch`）：抓取单个网页，直接返回 Markdown 正文。
+
+  ## 提供的能力
+
+  | 类型 | 名称 | 说明 |
+  |---|---|---|
+  | LLM 工具 | `web_search_deepseek` | 联网检索，结果带 index 便于引用 |
+  | LLM 工具 | `deepseek_fetch_web_page` | 抓取网页并转 Markdown |
+  | 命令 | `/dsearch 关键词 [--count 1~50]` | 人工快速搜索 |
+  | 命令 | `/dfetch https://…` | 人工抓取网页 |
+  | 命令 | `/dshelp` | 用法与计费说明 |
+
+  ## 支持官方搜索语法
+
+  `site:`、`-site:`、`"精确短语"`、`-排除词`、`lang:`、`after:`、`before:` 全部支持；
+  也可以直接用工具的 `site` / `lang` / `after` / `before` 参数，插件会自动拼成官方语法。
+
+  ## 计费与限速（官方规则）
+
+  Search 与 Fetch 均按**成功请求次数**计费，各 **5 元 / 1000 次**。
+  只有返回 HTTP 200 且产生结果的请求才计费：搜索无结果、请求失败、超时都不计费。
+  账号级 QPS 各 5，Fetch 另有目标域名级限速。
+
+  ## 密钥
+
+  在插件配置里填 `api_key`，支持多个密钥（逗号或换行分隔，自动轮询与故障切换）；
+  也可以开启 `fallback_to_astrbot_key`，直接复用 AstrBot 里已配置的 DeepSeek 供应商密钥，
+  无需重复填写。
+
+  ## 质量过滤
+
+  实测无意义 query 也会返回 `rerank_score` 约 0.2 的噪声条目。
+  可设置 `min_rerank_score`（0~3）自动丢弃低质量结果，官方以 ≥1.5 为优质结果。
+version: 1.0.0
+author: Fantasality
+repo: https://github.com/Fantasality/astrbot_plugin_deepseek_search
+astrbot_version: ">=4.16,<5"
+help: |
+  /dsearch 关键词 [--count 5]   联网搜索
+  /dfetch https://example.com   抓取网页转 Markdown
+  /dshelp                       用法与计费说明
+tags:
+  - 搜索
+  - 联网
+  - DeepSeek
+  - RAG
+  - 工具调用
+social_link: https://github.com/Fantasality
